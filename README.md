@@ -252,10 +252,21 @@ applications, and descriptions containing commas are correctly quoted.
 
 ## Screenshots
 
-The following terminal captures are rendered locally from actual
-PocketBudget function output using a temporary demo dataset. The repository
-preview is a Pillow illustration, not a browser screenshot. Regenerate the
-images with `python scripts/generate_screenshots.py`.
+The terminal screenshots are rendered from captured output of the actual
+PocketBudget functions using an isolated temporary demo dataset. The output is
+shown inside a Windows Terminal-style frame; the frame is presentation only
+and does not add text to the captured application output. No macOS-style
+window controls are used. The repository preview remains a separate Pillow
+illustration, not a browser screenshot.
+
+Regenerate the documentation images from the project root with:
+
+```powershell
+python scripts/generate_screenshots.py
+```
+
+The generator also rebuilds the chart images from the demo data. It does not
+change the application's chart implementation or chart styling.
 
 ### Main menu
 
