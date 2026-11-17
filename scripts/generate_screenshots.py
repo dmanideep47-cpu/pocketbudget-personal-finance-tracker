@@ -281,57 +281,110 @@ def render_terminal_screenshot(
     title: str,
     terminal_text: str,
 ) -> Path:
-    """Render captured terminal text as a sharp, high-resolution PNG window."""
+    """Render captured application stdout inside a Windows Terminal-style frame."""
     screenshot_dir = PROJECT_ROOT / "docs" / "screenshots"
     screenshot_dir.mkdir(parents=True, exist_ok=True)
     output_path = screenshot_dir / filename
 
+    # Keep the terminal presentation separate from application output. The text
+    # below the title bar is always captured from the real PocketBudget functions.
     width = 1600
     scale = 2
-    margin = 30
-    title_bar_height = 54
+    margin = 24
+    title_bar_height = 58
+    padding_top = 28
     line_height = 31
-    body_lines = _wrap_terminal_text(terminal_text)
-    content_height = max(340, 36 + len(body_lines) * line_height)
+    body_lines = _wrap_terminal_text(terminal_text, width=116)
+    content_height = max(300, padding_top + max(1, len(body_lines)) * line_height + 24)
     height = margin * 2 + title_bar_height + content_height
 
-    image = Image.new("RGB", (width * scale, height * scale), "#090D13")
+    image = Image.new("RGB", (width * scale, height * scale), "#0C0C0C")
     draw = ImageDraw.Draw(image)
-    panel = (margin * scale, margin * scale, (width - margin) * scale, (height - margin) * scale)
-    draw.rounded_rectangle(panel, radius=18 * scale, fill="#0D1117", outline="#30363D", width=2 * scale)
+    panel = (
+        margin * scale,
+        margin * scale,
+        (width - margin) * scale,
+        (height - margin) * scale,
+    )
     draw.rounded_rectangle(
-        (panel[0], panel[1], panel[2], panel[1] + title_bar_height * scale),
-        radius=18 * scale,
-        fill="#161B22",
+        panel,
+        radius=9 * scale,
+        fill="#0C0C0C",
+        outline="#343434",
+        width=1 * scale,
+    )
+
+    # Windows Terminal tab/title bar. No macOS traffic-light controls.
+    title_bottom = panel[1] + title_bar_height * scale
+    draw.rounded_rectangle(
+        (panel[0], panel[1], panel[2], title_bottom),
+        radius=9 * scale,
+        fill="#202020",
     )
     draw.rectangle(
-        (panel[0], panel[1] + 30 * scale, panel[2], panel[1] + title_bar_height * scale),
-        fill="#161B22",
+        (panel[0], panel[1] + 28 * scale, panel[2], title_bottom),
+        fill="#202020",
     )
-    for index, color in enumerate(("#FF5F57", "#FEBC2E", "#28C840")):
-        x = (margin + 22 + index * 24) * scale
-        y = (margin + 27) * scale
-        draw.ellipse((x - 6 * scale, y - 6 * scale, x + 6 * scale, y + 6 * scale), fill=color)
 
-    title_font = _load_font(17 * scale, bold=True)
-    body_font = _load_font(17 * scale)
-    draw.text(
-        ((margin + 105) * scale, (margin + 16) * scale),
-        f"PocketBudget  |  {title}",
-        font=title_font,
-        fill="#C9D1D9",
+    # Small PowerShell app tile.
+    icon_left = (margin + 16) * scale
+    icon_top = (margin + 17) * scale
+    icon_size = 23 * scale
+    draw.rounded_rectangle(
+        (icon_left, icon_top, icon_left + icon_size, icon_top + icon_size),
+        radius=4 * scale,
+        fill="#2675C9",
     )
-    text_x = (margin + 28) * scale
-    text_y = (margin + title_bar_height + 22) * scale
+    icon_font = _load_font(14 * scale, bold=True)
+    draw.text(
+        (icon_left + 3 * scale, icon_top + 1 * scale),
+        ">_",
+        font=icon_font,
+        fill="#FFFFFF",
+    )
+
+    title_font = _load_font(15 * scale)
+    draw.text(
+        ((margin + 48) * scale, (margin + 18) * scale),
+        "Windows PowerShell",
+        font=title_font,
+        fill="#F3F3F3",
+    )
+    draw.text(
+        ((margin + 285) * scale, (margin + 14) * scale),
+        "×",
+        font=_load_font(22 * scale),
+        fill="#D0D0D0",
+    )
+    draw.text(
+        ((margin + 350) * scale, (margin + 12) * scale),
+        "+",
+        font=_load_font(24 * scale),
+        fill="#E5E5E5",
+    )
+    draw.text(
+        ((width - margin - 160) * scale, (margin + 17) * scale),
+        "—    □    ×",
+        font=_load_font(17 * scale),
+        fill="#D8D8D8",
+    )
+
+    body_font = _load_font(16 * scale)
+    text_x = (margin + 22) * scale
+    text_y = (margin + title_bar_height + padding_top) * scale
     for line in body_lines:
-        draw.text((text_x, text_y), line, font=body_font, fill="#E6EDF3")
+        draw.text(
+            (text_x, text_y),
+            line,
+            font=body_font,
+            fill="#E6E6E6",
+        )
         text_y += line_height * scale
 
     resampling = getattr(Image, "Resampling", Image)
     image = image.resize((width, height), resample=resampling.LANCZOS)
     image.save(output_path, format="PNG", optimize=True)
     return output_path
-
 
 def render_repository_preview() -> Path:
     """Draw a GitHub-inspired repository illustration without browser capture."""
