@@ -280,107 +280,84 @@ def render_terminal_screenshot(
     filename: str,
     title: str,
     terminal_text: str,
+    *,
+    menu_choice: str | None = None,
+    command: str = "python main.py",
 ) -> Path:
-    """Render captured application stdout inside a Windows Terminal-style frame."""
-    # The frame is Windows-specific; captured stdout remains the source of truth.
+    """Render genuine PocketBudget output in a Windows PowerShell session layout."""
     screenshot_dir = PROJECT_ROOT / "docs" / "screenshots"
     screenshot_dir.mkdir(parents=True, exist_ok=True)
     output_path = screenshot_dir / filename
 
-    # Keep the terminal presentation separate from application output. The text
-    # below the title bar is always captured from the real PocketBudget functions.
+    working_directory = r"C:\dmani\OneDrive\Doc\PocketBudget"
+    prompt = f"PS {working_directory}> {command}"
+    session_lines = [prompt, ""]
+    if command == "python main.py":
+        # Reuse the application's actual menu renderer, not hand-written menu text.
+        session_lines.extend(_wrap_terminal_text(_capture_terminal(display_menu)))
+        if menu_choice is None:
+            session_lines.append("Enter your choice: ")
+        else:
+            session_lines.extend(["", f"Enter your choice: {menu_choice}", ""])
+    session_lines.extend(_wrap_terminal_text(terminal_text))
+    body_lines = session_lines
+
     width = 1600
     scale = 2
-    margin = 24
-    title_bar_height = 58
-    padding_top = 28
-    line_height = 31
-    body_lines = _wrap_terminal_text(terminal_text, width=116)
-    content_height = max(300, padding_top + max(1, len(body_lines)) * line_height + 24)
-    height = margin * 2 + title_bar_height + content_height
+    padding_left = 24
+    padding_top = 30
+    line_height = 34
+    body_font_size = 22
+    body_font = _load_font(body_font_size * scale)
+    content_height = max(
+        430,
+        padding_top + max(1, len(body_lines)) * line_height + 30,
+    )
+    height = content_height + 58
 
     image = Image.new("RGB", (width * scale, height * scale), "#0C0C0C")
     draw = ImageDraw.Draw(image)
-    panel = (
-        margin * scale,
-        margin * scale,
-        (width - margin) * scale,
-        (height - margin) * scale,
-    )
-    draw.rounded_rectangle(
-        panel,
-        radius=9 * scale,
-        fill="#0C0C0C",
-        outline="#343434",
-        width=1 * scale,
-    )
 
-    # Windows Terminal tab/title bar. No macOS traffic-light controls.
-    title_bottom = panel[1] + title_bar_height * scale
+    # Native Windows Terminal proportions: flat title bar, no rounded mock card.
+    draw.rectangle((0, 0, width * scale, 58 * scale), fill="#1F1F1F")
+    draw.rectangle((10 * scale, 5 * scale, 310 * scale, 53 * scale), fill="#0C0C0C")
+    icon_left, icon_top = 23 * scale, 15 * scale
     draw.rounded_rectangle(
-        (panel[0], panel[1], panel[2], title_bottom),
-        radius=9 * scale,
-        fill="#202020",
-    )
-    draw.rectangle(
-        (panel[0], panel[1] + 28 * scale, panel[2], title_bottom),
-        fill="#202020",
-    )
-
-    # Small PowerShell app tile.
-    icon_left = (margin + 16) * scale
-    icon_top = (margin + 17) * scale
-    icon_size = 23 * scale
-    draw.rounded_rectangle(
-        (icon_left, icon_top, icon_left + icon_size, icon_top + icon_size),
-        radius=4 * scale,
+        (icon_left, icon_top, icon_left + 25 * scale, icon_top + 25 * scale),
+        radius=3 * scale,
         fill="#2675C9",
     )
-    icon_font = _load_font(14 * scale, bold=True)
     draw.text(
-        (icon_left + 3 * scale, icon_top + 1 * scale),
+        (icon_left + 3 * scale, icon_top - 1 * scale),
         ">_",
-        font=icon_font,
+        font=_load_font(14 * scale, bold=True),
         fill="#FFFFFF",
     )
-
-    title_font = _load_font(15 * scale)
     draw.text(
-        ((margin + 48) * scale, (margin + 18) * scale),
+        (57 * scale, 15 * scale),
         "Windows PowerShell",
-        font=title_font,
+        font=_load_font(16 * scale),
         fill="#F3F3F3",
     )
-    draw.text(
-        ((margin + 285) * scale, (margin + 14) * scale),
-        "×",
-        font=_load_font(22 * scale),
-        fill="#D0D0D0",
-    )
-    draw.text(
-        ((margin + 350) * scale, (margin + 12) * scale),
-        "+",
-        font=_load_font(24 * scale),
-        fill="#E5E5E5",
-    )
-    draw.text(
-        ((width - margin - 160) * scale, (margin + 17) * scale),
-        "—    □    ×",
-        font=_load_font(17 * scale),
-        fill="#D8D8D8",
-    )
+    draw.text((280 * scale, 10 * scale), "×", font=_load_font(23 * scale), fill="#D0D0D0")
+    draw.text((365 * scale, 8 * scale), "+", font=_load_font(25 * scale), fill="#E5E5E5")
+    draw.text((width * scale - 190 * scale, 13 * scale), "—    □    ×",
+              font=_load_font(18 * scale), fill="#D8D8D8")
 
-    body_font = _load_font(16 * scale)
-    text_x = (margin + 22) * scale
-    text_y = (margin + title_bar_height + padding_top) * scale
+    text_x = padding_left * scale
+    text_y = (58 + padding_top) * scale
     for line in body_lines:
-        draw.text(
-            (text_x, text_y),
-            line,
-            font=body_font,
-            fill="#E6E6E6",
-        )
+        draw.text((text_x, text_y), line, font=body_font, fill="#DCDCDC")
         text_y += line_height * scale
+
+    # Main-menu screenshot shows the real waiting prompt with a terminal cursor.
+    if command == "python main.py" and menu_choice is None:
+        cursor_x = text_x + draw.textlength("Enter your choice: ", font=body_font)
+        draw.rectangle(
+            (cursor_x + 2 * scale, text_y - line_height * scale + 5 * scale,
+             cursor_x + 4 * scale, text_y - line_height * scale + 30 * scale),
+            fill="#DCDCDC",
+        )
 
     resampling = getattr(Image, "Resampling", Image)
     image = image.resize((width, height), resample=resampling.LANCZOS)
@@ -541,7 +518,7 @@ def generate_screenshots() -> list[Path]:
             )
         )
         generated.append(
-            render_terminal_screenshot("add-expense.png", "Add Expense", add_output)
+            render_terminal_screenshot("add-expense.png", "Add Expense", add_output, menu_choice="1")
         )
 
         error_demo_file = temporary_root / "error-expense.json"
@@ -564,6 +541,7 @@ def generate_screenshots() -> list[Path]:
                 "error-handling.png",
                 "Input Validation",
                 error_output,
+                menu_choice="1",
             )
         )
 
@@ -578,6 +556,7 @@ def generate_screenshots() -> list[Path]:
                 "budget-status.png",
                 "Budget Status",
                 budget_output,
+                menu_choice="8",
             )
         )
 
@@ -589,6 +568,7 @@ def generate_screenshots() -> list[Path]:
                 "monthly-report.png",
                 "Monthly Expense Report",
                 report_output,
+                menu_choice="9",
             )
         )
 
@@ -600,6 +580,7 @@ def generate_screenshots() -> list[Path]:
                 "spending-analysis.png",
                 "Spending Analysis",
                 analysis_output,
+                menu_choice="10",
             )
         )
 
@@ -616,6 +597,7 @@ def generate_screenshots() -> list[Path]:
                 "csv-export.png",
                 "Monthly CSV Export",
                 export_output,
+                menu_choice="11",
             )
         )
 
@@ -625,6 +607,7 @@ def generate_screenshots() -> list[Path]:
                 "pytest-passed.png",
                 "Automated Tests",
                 pytest_output,
+                command="python -m pytest -q",
             )
         )
 
