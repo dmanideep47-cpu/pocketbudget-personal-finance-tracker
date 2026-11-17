@@ -282,6 +282,7 @@ def render_terminal_screenshot(
     terminal_text: str,
 ) -> Path:
     """Render captured application stdout inside a Windows Terminal-style frame."""
+    # The frame is Windows-specific; captured stdout remains the source of truth.
     screenshot_dir = PROJECT_ROOT / "docs" / "screenshots"
     screenshot_dir.mkdir(parents=True, exist_ok=True)
     output_path = screenshot_dir / filename
