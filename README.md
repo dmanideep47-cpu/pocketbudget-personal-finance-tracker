@@ -388,17 +388,6 @@ See [docs/EVALUATION_GUIDE.md](docs/EVALUATION_GUIDE.md) for a step-by-step
 live demonstration plan, key financial formulas, architecture explanation,
 common viva questions, and a submission checklist.
 
-## Team contribution
-
-Replace the placeholders with the actual team members before submission.
-
-| Team member | Contribution |
-| --- | --- |
-| Member 1 | Transaction management and JSON storage |
-| Member 2 | Budgets, validation, and financial advisor |
-| Member 3 | Pandas analysis, charts, and CSV export |
-| Member 4 | Tests, screenshots, and documentation |
-
 ## Future scope
 
 - Add recurring expenses and optional reminders.
