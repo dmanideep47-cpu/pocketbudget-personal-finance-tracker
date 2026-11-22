@@ -88,6 +88,29 @@ The monthly report calculates the mean of daily totals over days that contain
 at least one recorded expense. It is not an average over every calendar day
 in the month.
 
+## 6. How to explain the five charts
+
+Use the charts to explain a decision, not merely to point at colours.
+
+1. **Category distribution:** identifies which categories account for the largest
+   share of monthly expenses. A large slice is a prompt to inspect that category,
+   not proof that the spending is unnecessary.
+2. **Daily spending trend:** shows how spending changes across recorded
+   transaction days. Peaks can be matched against the transaction list to
+   explain unusually expensive days.
+3. **Budget versus actual:** compares each configured category limit with its
+   recorded spending. A red actual bar indicates spending above a configured
+   category limit. A category without a configured limit is not a budget
+   compliance result.
+4. **Monthly category spending:** ranks categories by actual amount. Compare
+   the largest bars with the category distribution and budget report.
+5. **Income, expenses and savings:** compares monthly income and expenses with
+   net savings. Negative savings means expenses exceeded income; positive
+   savings means income exceeded expenses.
+
+The charts are descriptive summaries of the records entered by the user.
+They do not predict future spending or connect to bank accounts.
+
 ## 6. Data design
 
 The application uses two local JSON files:
