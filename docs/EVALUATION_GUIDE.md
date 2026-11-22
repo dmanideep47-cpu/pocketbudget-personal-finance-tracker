@@ -111,7 +111,7 @@ Use the charts to explain a decision, not merely to point at colours.
 The charts are descriptive summaries of the records entered by the user.
 They do not predict future spending or connect to bank accounts.
 
-## 6. Data design
+## 7. Data design
 
 The application uses two local JSON files:
 
@@ -128,7 +128,7 @@ JSON is suitable for this small, single-user learning project because it is
 human-readable and does not require a database server. It is not intended as a
 multi-user or high-volume storage system.
 
-## 7. Validation and reliability
+## 8. Validation and reliability
 
 The application checks positive finite amounts, calendar-valid dates,
 month formats, supported categories, payment methods, and transaction IDs.
@@ -137,7 +137,7 @@ initialized. Corrupt JSON is reported rather than silently replaced.
 Existing data is backed up before a write, and updates use an atomic
 replacement strategy.
 
-## 8. Testing and continuous integration
+## 9. Testing and continuous integration
 
 Run the full suite locally:
 
@@ -151,7 +151,7 @@ The tests use temporary directories for storage and export operations so the
 real project data is not overwritten. GitHub Actions also runs compilation
 and pytest on Ubuntu and Windows with Python 3.12 for pushes and pull requests.
 
-## 9. Common viva questions
+## 10. Common viva questions
 
 **Why is JSON used instead of a database?**
 
@@ -188,7 +188,7 @@ expense-to-income ratios, concentration in the largest spending category,
 and a savings target. It does not train a machine-learning model or provide
 professional financial advice.
 
-## 10. Current limitations and future scope
+## 11. Current limitations and future scope
 
 The current version is terminal-based, local, and single-user. It does not
 provide authentication, cloud synchronization, bank integration, recurring
@@ -197,7 +197,7 @@ Reasonable future extensions include recurring transactions, configurable
 currency formatting, savings goals, encrypted backups, and a database-backed
 multi-user edition.
 
-## 11. Submission checklist
+## 12. Submission checklist
 
 - [ ] Confirm the project title and student/team details on the submitted report.
 - [ ] Run the application from a clean project copy.
