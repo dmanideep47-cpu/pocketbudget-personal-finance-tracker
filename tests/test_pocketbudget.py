@@ -172,6 +172,39 @@ def test_savings_percentage_handles_income_and_missing_income() -> None:
     assert calculate_savings_percentage(0, 10) == 0.0
 
 
+def test_validation_rejects_non_string_calendar_values() -> None:
+    """Calendar validators reject non-string values instead of coercing them."""
+    for value in (None, 20260409, True, ""):
+        with pytest.raises(ValueError):
+            validate_date(value)
+    for value in (None, 202604, True, ""):
+        with pytest.raises(ValueError):
+            validate_month(value)
+
+
+def test_savings_percentage_can_be_negative_when_expenses_exceed_income() -> None:
+    """A deficit is represented as a negative savings percentage."""
+    assert calculate_savings_percentage(1000, 1250) == -25.0
+
+
+def test_budget_boundary_is_not_over_budget_until_spending_exceeds_limit() -> None:
+    """Spending exactly at a configured limit is within budget."""
+    expenses = [
+        {
+            "id": 1,
+            "type": "expense",
+            "amount": 100.0,
+            "category": "Food",
+            "date": "2026-04-10",
+            "description": "Groceries",
+            "payment_method": "UPI",
+        }
+    ]
+    budgets = {"2026-04": {"Food": 100.0}}
+    assert calculate_budget_left("2026-04", expenses, budgets, "Food") == 0.0
+    assert not check_over_budget("2026-04", expenses, budgets, "Food")
+
+
 def test_highest_expense_days_returns_ties_and_handles_empty_series() -> None:
     """All days tied for highest spend are returned, or empty when no data."""
     spending = pd.Series(

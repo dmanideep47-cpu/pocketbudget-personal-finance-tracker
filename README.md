@@ -384,16 +384,9 @@ menu behavior. Tests use temporary data so real user records remain untouched.
 See [docs/PROJECT_REPORT.md](docs/PROJECT_REPORT.md) for the project objective,
 data design, module responsibilities, validation strategy, and limitations.
 
-## Team contribution
-
-Replace the placeholders with the actual team members before submission.
-
-| Team member | Contribution |
-| --- | --- |
-| Member 1 | Transaction management and JSON storage |
-| Member 2 | Budgets, validation, and financial advisor |
-| Member 3 | Pandas analysis, charts, and CSV export |
-| Member 4 | Tests, screenshots, and documentation |
+See [docs/EVALUATION_GUIDE.md](docs/EVALUATION_GUIDE.md) for a step-by-step
+live demonstration plan, key financial formulas, architecture explanation,
+common viva questions, and a submission checklist.
 
 ## Future scope
 
